@@ -4,7 +4,7 @@
 # GitHub
 #   https://github.com/Korchy/blender_eevee_materials_override
 
-# ToDo - override with uv
+import bpy
 
 
 class EeveeMaterialsOverride:
@@ -13,6 +13,8 @@ class EeveeMaterialsOverride:
     _overrider_name = 'EEVEE Materials Overrider'
     _clay_id = 'eevee_materials_clay'
     _clay_name = 'Clay'
+    _uv_grid_id = 'eevee_materials_uv_grid'
+    _uv_grid_name = 'UVGrid'
 
     @classmethod
     def override_clay(cls, scene_data):
@@ -36,7 +38,9 @@ class EeveeMaterialsOverride:
     def override_uv_grid(cls, scene_data):
         # override with UV-grid material
         override_nodetree = cls.override_nodegroup(node_groups=scene_data.node_groups)
-        # ToDo
+        img = cls.uv_grid_image(scene_images=scene_data.images)
+        print(img)
+
 
     @classmethod
     def extend_to_all_materials(cls, scene_data):
@@ -202,3 +206,14 @@ class EeveeMaterialsOverride:
         # nodegroup_node_tree = bpy.data.node_groups.new(cls._custom_name, 'ShaderNodeTree')
         # nodegroup_node_tree = node_tree
         return node_tree
+
+    @classmethod
+    def uv_grid_image(cls, scene_images):
+        # get uv grid image
+        uv_grid_image = next((image for image in scene_images if cls._uv_grid_id in image), None)
+        if not uv_grid_image:
+            existing_images = set(scene_images)
+            bpy.ops.image.new(name=cls._uv_grid_name, width=1024, height=1024, generated_type='UV_GRID')
+            uv_grid_image = list(set(scene_images) - existing_images)[0]
+            uv_grid_image[cls._uv_grid_id] = True  # id marker
+        return uv_grid_image
