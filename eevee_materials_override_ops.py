@@ -20,6 +20,7 @@ class EEVEE_MATERIALS_OVERRIDE_OT_extend_to_all(Operator):
         EeveeMaterialsOverride.extend_to_all_materials(
             scene_data=bpy.data
         )
+        context.window_manager.eevee_materials_override_vars.enable = True
         return {'FINISHED'}
 
 
@@ -33,6 +34,7 @@ class EEVEE_MATERIALS_OVERRIDE_OT_clay_override(Operator):
         EeveeMaterialsOverride.override_clay(
             scene_data=bpy.data
         )
+        context.window_manager.eevee_materials_override_vars.enable = True
         return {'FINISHED'}
 
 
@@ -43,7 +45,10 @@ class EEVEE_MATERIALS_OVERRIDE_OT_uv_grid_override(Operator):
     bl_options = {'REGISTER', 'UNDO'}
 
     def execute(self, context):
-        # EeveeMaterialsOverride.override_uv_grid()
+        EeveeMaterialsOverride.override_uv_grid(
+            scene_data=bpy.data
+        )
+        context.window_manager.eevee_materials_override_vars.enable = True
         return {'FINISHED'}
 
 
@@ -54,7 +59,11 @@ class EEVEE_MATERIALS_OVERRIDE_OT_custom_override(Operator):
     bl_options = {'REGISTER', 'UNDO'}
 
     def execute(self, context):
-        # EeveeMaterialsOverride.override_custom()
+        EeveeMaterialsOverride.override_custom(
+            scene_data=bpy.data,
+            custom_material=context.window_manager.eevee_materials_override_vars.custom_material
+        )
+        context.window_manager.eevee_materials_override_vars.enable = True
         return {'FINISHED'}
 
 

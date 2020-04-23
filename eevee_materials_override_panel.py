@@ -19,14 +19,14 @@ class EEVEE_MATERIALS_OVERRIDE_PT_panel(Panel):
         layout = self.layout
         layout.operator('eevee_materials_override.extend_to_all', icon='CON_LOCLIKE')
         if context.window_manager.eevee_materials_override_vars.enable:
-            layout.prop(context.window_manager.eevee_materials_override_vars, 'enable', icon='CHECKMARK', text='Disable')
+            layout.prop(context.window_manager.eevee_materials_override_vars, 'enable', icon='PAUSE', text='Disable')
         else:
-            layout.prop(context.window_manager.eevee_materials_override_vars, 'enable', icon='RADIOBUT_OFF', text='Enable')
+            layout.prop(context.window_manager.eevee_materials_override_vars, 'enable', icon='PLAY', text='Enable')
         box = layout.box()
-        box.label(text='Presets')
-        box.operator('eevee_materials_override.clay_override', icon='SHADING_RENDERED')
-        box.operator('eevee_materials_override.uv_grid_override', icon='UV')
-        box.operator('eevee_materials_override.custom_override')
+        box.label(text='Override with:')
+        box.operator('eevee_materials_override.clay_override', icon='SHADING_RENDERED', text='Clay')
+        box.operator('eevee_materials_override.uv_grid_override', icon='UV', text='UV Grid')
+        box.operator('eevee_materials_override.custom_override', icon='MATERIAL', text='Custom Material')
         box.prop(context.window_manager.eevee_materials_override_vars, 'custom_material', text='')
 
 
