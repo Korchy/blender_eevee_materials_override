@@ -38,9 +38,9 @@ class EeveeMaterialsOverride:
     def override_uv_grid(cls, scene_data):
         # override with UV-grid material
         override_nodetree = cls.override_nodegroup(node_groups=scene_data.node_groups)
-        img = cls.uv_grid_image(scene_images=scene_data.images)
-        print(img)
-
+        uv_grid_nodetree = cls.uv_grid_nodegroup(scene_data=scene_data)
+        cls.set_override_material(override_nodetree=override_nodetree, material_nodetree=uv_grid_nodetree)
+        cls.extend_to_all_materials(scene_data=scene_data)
 
     @classmethod
     def extend_to_all_materials(cls, scene_data):
@@ -206,6 +206,40 @@ class EeveeMaterialsOverride:
         # nodegroup_node_tree = bpy.data.node_groups.new(cls._custom_name, 'ShaderNodeTree')
         # nodegroup_node_tree = node_tree
         return node_tree
+
+    @classmethod
+    def uv_grid_nodegroup(cls, scene_data):
+        # create uv grid node group
+        nodegroup = next((nodegroup for nodegroup in scene_data.node_groups if cls._uv_grid_id in nodegroup), None)
+        if not nodegroup:
+            nodegroup = scene_data.node_groups.new(cls._uv_grid_name, 'ShaderNodeTree')
+            nodegroup[cls._uv_grid_id] = True  # id marker
+            # outputs
+            nodegroup.outputs.new('NodeSocketShader', 'BSDF')
+            # group input/output nodes
+            group_input_node = nodegroup.nodes.new('NodeGroupInput')
+            group_input_node.location = (-800, 200)
+            group_output_node = nodegroup.nodes.new('NodeGroupOutput')
+            group_output_node.location = (300, 200)
+            # nodes
+            diffuse_bsdf = nodegroup.nodes.new('ShaderNodeBsdfDiffuse')
+            diffuse_bsdf.location = (50.0, 300.0)
+            image_texture = nodegroup.nodes.new('ShaderNodeTexImage')
+            image_texture.location = (-250.0, 300.0)
+            uv_grid_image = cls.uv_grid_image(scene_images=scene_data.images)
+            if uv_grid_image:
+                image_texture.image = uv_grid_image
+            mapping = nodegroup.nodes.new('ShaderNodeMapping')
+            mapping.location = (-500.0, 300.0)
+            mapping.inputs['Scale'].default_value = (0.5, 0.5, 0.5)
+            texture_coordinate = nodegroup.nodes.new('ShaderNodeTexCoord')
+            texture_coordinate.location = (-650.0, 300.0)
+            # links
+            nodegroup.links.new(image_texture.outputs[0], diffuse_bsdf.inputs[0])
+            nodegroup.links.new(mapping.outputs[0], image_texture.inputs[0])
+            nodegroup.links.new(texture_coordinate.outputs[2], mapping.inputs[0])
+            nodegroup.links.new(diffuse_bsdf.outputs[0], group_output_node.inputs[0])
+        return nodegroup
 
     @classmethod
     def uv_grid_image(cls, scene_images):
