@@ -12,13 +12,13 @@ from .addon import Addon
 
 bl_info = {
     'name': 'eevee_materials_override',
-    'category': 'All',
+    'category': 'Material',
     'author': 'Nikita Akimov',
     'version': (1, 0, 0),
-    'blender': (2, 83, 0),
+    'blender': (2, 82, 0),
     'location': 'N-Panel > Override',
-    'wiki_url': 'https://b3d.interplanety.org/en/blender-add-on-e…terials-override/',
-    'tracker_url': 'https://b3d.interplanety.org/en/blender-add-on-e…terials-override/',
+    'wiki_url': 'https://b3d.interplanety.org/en/blender-add-on-eevee-materials-override/',
+    'tracker_url': 'https://b3d.interplanety.org/en/blender-add-on-eevee-materials-override/',
     'description': 'Global scene materials override for the EEVEE render engine'
 }
 
