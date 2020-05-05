@@ -15,6 +15,7 @@ class EeveeMaterialsOverride:
     _clay_name = 'Clay'
     _uv_grid_id = 'eevee_materials_uv_grid'
     _uv_grid_name = 'UVGrid'
+    _default_override_material_name = 'eevee_override_default'
 
     @classmethod
     def override_clay(cls, scene_data):
@@ -48,6 +49,9 @@ class EeveeMaterialsOverride:
         # create override node group
         override_nodegroup = cls.override_nodegroup(node_groups=scene_data.node_groups)
         if override_nodegroup:
+            # init objects without material with the default material
+            if bpy.context.preferences.addons[__package__].preferences.override_no_material:
+                cls._default_material_init(scene_data=scene_data)
             # extend to all materials
             materials = (material for material in scene_data.materials if material.node_tree)
             for material in materials:
@@ -251,3 +255,19 @@ class EeveeMaterialsOverride:
             uv_grid_image = list(set(scene_images) - existing_images)[0]
             uv_grid_image[cls._uv_grid_id] = True  # id marker
         return uv_grid_image
+
+    @classmethod
+    def _default_material_init(cls, scene_data):
+        # init objects without material with the default material
+        no_material_objects = (obj for obj in scene_data.objects if not obj.active_material and obj.type in ('MESH', 'CURVE'))
+        if no_material_objects:
+            # create default materials
+            default_override_material = next((material for material in scene_data.materials if material.name == cls._default_override_material_name), None)
+            if not default_override_material:
+                default_override_material = scene_data.materials.new(name=cls._default_override_material_name)
+                default_override_material.use_nodes = True
+                default_override_material.use_fake_user = True
+            if default_override_material:
+                # assign default material to all objects without materials
+                for obj in no_material_objects:
+                    obj.active_material = default_override_material
