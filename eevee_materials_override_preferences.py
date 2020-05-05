@@ -5,7 +5,7 @@
 #   https://github.com/Korchy/blender_eevee_materials_override
 
 from bpy.types import AddonPreferences
-from bpy.props import StringProperty, BoolProperty
+from bpy.props import BoolProperty
 from bpy.utils import register_class, unregister_class
 
 
