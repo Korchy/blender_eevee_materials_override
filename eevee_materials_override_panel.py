@@ -4,7 +4,8 @@
 # GitHub
 #   https://github.com/Korchy/blender_eevee_materials_override
 
-from bpy.types import Panel
+import bpy
+from bpy.types import Panel, UIList
 from bpy.utils import register_class, unregister_class
 
 
@@ -31,11 +32,31 @@ class EEVEE_MATERIALS_OVERRIDE_PT_panel(Panel):
         box.operator('eevee_materials_override.uv_grid_override', icon='UV', text='UV Grid')
         box.operator('eevee_materials_override.custom_override', icon='MATERIAL', text='Custom Material')
         box.prop(context.window_manager.eevee_materials_override_vars, 'custom_material', text='')
+        box = layout.box()
+        box.label(text='Exclude material from override')
+        box.template_list(
+            listtype_name='EEVEE_MATERIALS_OVERRIDE_UL_materials_list',
+            list_id='Mat_list',
+            dataptr=bpy.data,
+            propname='materials',
+            active_dataptr=context.window_manager,
+            active_propname='eevee_materials_override_fake_index'
+        )
+
+
+class EEVEE_MATERIALS_OVERRIDE_UL_materials_list(UIList):
+
+    def draw_item(self, context, layout, data, item, icon, active_data, active_property, index=0, flt_flag=0):
+        layout.label(text=item.name, icon_value=icon)
+        layout.separator(factor=2.0)
+        layout.prop(data=item, property='eevee_materials_override_exclude', text='excluded')
 
 
 def register():
+    register_class(EEVEE_MATERIALS_OVERRIDE_UL_materials_list)
     register_class(EEVEE_MATERIALS_OVERRIDE_PT_panel)
 
 
 def unregister():
     unregister_class(EEVEE_MATERIALS_OVERRIDE_PT_panel)
+    unregister_class(EEVEE_MATERIALS_OVERRIDE_UL_materials_list)

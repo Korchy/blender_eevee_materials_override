@@ -72,6 +72,9 @@ class EeveeMaterialsOverride:
                             material.node_tree.links.remove(link_to_output_node)
                             material.node_tree.links.new(link_to_output_node_from_socket, override_node.inputs['Surface'])
                         material.node_tree.links.new(override_node.outputs['BSDF'], node_material_output.inputs['Surface'])
+                # if this material excluded from override - mute override node group
+                if material.eevee_materials_override_exclude:
+                    override_node.mute = True
 
     @classmethod
     def change_mode(cls, scene_data, mode: bool):
@@ -80,6 +83,13 @@ class EeveeMaterialsOverride:
         switcher = next((node for node in override_nodegroup.nodes if node.type == 'MIX_SHADER'), None)
         if switcher:
             switcher.inputs['Fac'].default_value = float(mode)
+
+    @classmethod
+    def change_material_exclude(cls, material):
+        # change exclude from override property for current material
+        override_node = next((node for node in material.node_tree.nodes if cls._overrider_id in node), None)
+        if override_node:
+            override_node.mute = float(material.eevee_materials_override_exclude)
 
     @staticmethod
     def set_override_material(override_nodetree, material_nodetree):
