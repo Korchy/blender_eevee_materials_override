@@ -47,8 +47,8 @@ Installation
 Version history
 -
 1.3.0.
-- added "override selected" feature
-- added clear all feature
+- added "override for selected objects" feature
+- added clearing features for the object and the materials mode
 
 1.2.1.
 - Fixing bugs
