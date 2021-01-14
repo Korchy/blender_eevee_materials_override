@@ -6,8 +6,6 @@
 
 import bpy
 
-# todo : if change material manually (to not to base_override) - control through the depsgraph_update - remove backups on that object
-
 class EeveeMaterialsOverride:
 
     _overrider_id = 'eevee_materials_overrider'
