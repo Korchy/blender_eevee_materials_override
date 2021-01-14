@@ -15,7 +15,7 @@ bl_info = {
     'name': 'eevee_materials_override',
     'category': 'Material',
     'author': 'Nikita Akimov',
-    'version': (1, 2, 1),
+    'version': (1, 3, 0),
     'blender': (2, 83, 0),
     'location': 'N-Panel > Override',
     'wiki_url': 'https://b3d.interplanety.org/en/blender-add-on-eevee-materials-override/',

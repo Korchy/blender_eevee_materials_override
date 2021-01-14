@@ -11,7 +11,7 @@ from bpy.utils import register_class, unregister_class
 
 class EEVEE_MATERIALS_OVERRIDE_PT_panel(Panel):
     bl_idname = 'EEVEE_MATERIALS_OVERRIDE_PT_panel'
-    bl_label = 'EEVEE Materials Override'
+    bl_label = 'Materials Override - Materials mode'
     bl_space_type = 'VIEW_3D'
     bl_region_type = 'UI'
     bl_category = 'Override'
@@ -44,6 +44,48 @@ class EEVEE_MATERIALS_OVERRIDE_PT_panel(Panel):
         )
 
 
+class EEVEE_MATERIALS_OVERRIDE_PT_panel_obj(Panel):
+    bl_idname = 'EEVEE_MATERIALS_OVERRIDE_PT_panel_obj'
+    bl_label = 'Materials Override - Objects mode'
+    bl_space_type = 'VIEW_3D'
+    bl_region_type = 'UI'
+    bl_category = 'Override'
+
+    def draw(self, context):
+        layout = self.layout
+        box = layout.box()
+        # override
+        box.label(text='Override for selected objects with:')
+        op = box.operator('eevee_materials_override.override_selected', icon='SHADING_RENDERED', text='Clay')
+        op.material_type = 'CLAY'
+        op = box.operator('eevee_materials_override.override_selected', icon='UV', text='UV Grid')
+        op.material_type = 'UV_GRID'
+        op = box.operator('eevee_materials_override.override_selected', icon='MATERIAL', text='Custom Material')
+        op.material_type = 'CUSTOM'
+        box.prop(context.window_manager.eevee_materials_override_vars, 'custom_material', text='')
+        # restore
+        layout.operator('eevee_materials_override.restore_selected', icon='LOOP_BACK')
+
+
+class EEVEE_MATERIALS_OVERRIDE_PT_panel_clean(Panel):
+    bl_idname = 'EEVEE_MATERIALS_OVERRIDE_PT_panel_clean'
+    bl_label = 'Materials Override - Cleaning'
+    bl_space_type = 'VIEW_3D'
+    bl_region_type = 'UI'
+    bl_category = 'Override'
+
+    def draw(self, context):
+        layout = self.layout
+        # Materials mode
+        box = layout.box()
+        box.label(text='For All Materials:')
+        box.operator('eevee_materials_override.clean_materials', icon='BRUSH_DATA')
+        # Objects mode
+        box = layout.box()
+        box.label(text='For All Objects:')
+        box.operator('eevee_materials_override.remove_backup', icon='CANCEL')
+
+
 class EEVEE_MATERIALS_OVERRIDE_UL_materials_list(UIList):
 
     def draw_item(self, context, layout, data, item, icon, active_data, active_property, index=0, flt_flag=0):
@@ -55,8 +97,12 @@ class EEVEE_MATERIALS_OVERRIDE_UL_materials_list(UIList):
 def register():
     register_class(EEVEE_MATERIALS_OVERRIDE_UL_materials_list)
     register_class(EEVEE_MATERIALS_OVERRIDE_PT_panel)
+    register_class(EEVEE_MATERIALS_OVERRIDE_PT_panel_obj)
+    register_class(EEVEE_MATERIALS_OVERRIDE_PT_panel_clean)
 
 
 def unregister():
+    unregister_class(EEVEE_MATERIALS_OVERRIDE_PT_panel_clean)
+    unregister_class(EEVEE_MATERIALS_OVERRIDE_PT_panel_obj)
     unregister_class(EEVEE_MATERIALS_OVERRIDE_PT_panel)
     unregister_class(EEVEE_MATERIALS_OVERRIDE_UL_materials_list)

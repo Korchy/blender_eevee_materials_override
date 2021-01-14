@@ -29,7 +29,7 @@ The add-on is for the “EEVEE” render engine but also works with the “Cycle
 
 Current add-on version
 -
-1.2.1.
+1.3.0.
 
 Blender versions
 -
@@ -46,6 +46,10 @@ Installation
 
 Version history
 -
+1.3.0.
+- added "override selected" feature
+- added clear all feature
+
 1.2.1.
 - Fixing bugs
 

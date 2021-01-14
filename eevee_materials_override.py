@@ -6,6 +6,7 @@
 
 import bpy
 
+# todo : if change material manually (to not to base_override) - control through the depsgraph_update - remove backups on that object
 
 class EeveeMaterialsOverride:
 
@@ -16,6 +17,7 @@ class EeveeMaterialsOverride:
     _uv_grid_id = 'eevee_materials_uv_grid'
     _uv_grid_name = 'UVGrid'
     _default_override_material_name = 'eevee_override_default'
+    _override_base = 'override_base'    # marker for base materials for override (don't override themself)
 
     @classmethod
     def override_clay(cls, scene_data):
@@ -53,7 +55,7 @@ class EeveeMaterialsOverride:
             if bpy.context.preferences.addons[__package__].preferences.override_no_material:
                 cls._default_material_init(scene_data=scene_data)
             # extend to all materials
-            materials = (material for material in scene_data.materials if material.node_tree)
+            materials = (material for material in scene_data.materials if material.node_tree and cls._override_base not in material)
             for material in materials:
                 override_node = next((node for node in material.node_tree.nodes if cls._overrider_id in node), None)
                 node_material_output = next((node for node in material.node_tree.nodes if node.name == 'Material Output'), None)
@@ -75,6 +77,39 @@ class EeveeMaterialsOverride:
                 # if this material excluded from override - mute override node group
                 if material.eevee_materials_override_exclude and override_node:
                     override_node.mute = True
+
+    @classmethod
+    def override_objects(cls, context, scene_data, objects, material_type: str):
+        # override materials for objects
+        # get material to override
+        material = None
+        if material_type == 'CLAY':
+            material = cls.clay_material(scene_data=scene_data)
+        elif material_type == 'UV_GRID':
+            material = cls.uv_grid_material(scene_data=scene_data)
+        elif material_type == 'CUSTOM':
+            material = context.window_manager.eevee_materials_override_vars.custom_material
+        if material:
+            # first - only backup for all objects (or linked objects backups already override material)
+            for obj in objects:
+                if not obj.eevee_materials_override_mat_backup:     # if already has backup - no more backups
+                    # backup current material by slots
+                    for slot in obj.material_slots:
+                        mat_backup = obj.eevee_materials_override_mat_backup.add()
+                        mat_backup.material = slot.material
+            # next - override
+            for obj in objects:
+                for slot in obj.material_slots:
+                    # slot.link = 'OBJECT'    # 'DATA'  - don't override on linked objects - need to be backup and restore as materials
+                    slot.material = material
+
+    @classmethod
+    def restore_objects(cls, objects):
+        # restore override materials for objects
+        for obj in objects:
+            for i, material_backup in enumerate(obj.eevee_materials_override_mat_backup):
+                obj.material_slots[i].material = obj.eevee_materials_override_mat_backup[0].material
+                obj.eevee_materials_override_mat_backup.remove(0)
 
     @classmethod
     def change_mode(cls, scene_data, mode: bool):
@@ -132,6 +167,30 @@ class EeveeMaterialsOverride:
             nodegroup.links.new(group_input_node.outputs['Surface'], mix_shader_node.inputs[1])
             nodegroup.links.new(mix_shader_node.outputs[0], group_output_node.inputs['BSDF'])
         return nodegroup
+
+    @classmethod
+    def clay_material(cls, scene_data):
+        # create "clay" material
+        clay_material = next((material for material in scene_data.materials if cls._clay_id in material), None)
+        if not clay_material:
+            # create new
+            clay_material = scene_data.materials.new(name=cls._clay_name)
+            clay_material.use_nodes = True
+            clay_material[cls._override_base] = True    # override base material
+            clay_material[cls._clay_id] = True          # id marker
+            output_node = next((node for node in clay_material.node_tree.nodes if node.type == 'OUTPUT_MATERIAL'), None)
+            for node in clay_material.node_tree.nodes:
+                if node != output_node:
+                    clay_material.node_tree.nodes.remove(node)
+            # add material node group
+            material_node = clay_material.node_tree.nodes.new(type='ShaderNodeGroup')
+            material_node.location = (0, 0)
+            material_node.node_tree = cls.clay_nodegroup(
+                node_groups=scene_data.node_groups
+            )
+            # links
+            clay_material.node_tree.links.new(material_node.outputs['BSDF'], output_node.inputs[0])
+        return clay_material
 
     @classmethod
     def clay_nodegroup(cls, node_groups: list):
@@ -223,6 +282,30 @@ class EeveeMaterialsOverride:
         return node_tree
 
     @classmethod
+    def uv_grid_material(cls, scene_data):
+        # create "uv_grid" material
+        uv_grid_material = next((material for material in scene_data.materials if cls._uv_grid_id in material), None)
+        if not uv_grid_material:
+            # create new
+            uv_grid_material = scene_data.materials.new(name=cls._uv_grid_name)
+            uv_grid_material.use_nodes = True
+            uv_grid_material[cls._override_base] = True    # override base material
+            uv_grid_material[cls._uv_grid_id] = True       # id marker
+            output_node = next((node for node in uv_grid_material.node_tree.nodes if node.type == 'OUTPUT_MATERIAL'), None)
+            for node in uv_grid_material.node_tree.nodes:
+                if node != output_node:
+                    uv_grid_material.node_tree.nodes.remove(node)
+            # add material node group
+            material_node = uv_grid_material.node_tree.nodes.new(type='ShaderNodeGroup')
+            material_node.location = (0, 0)
+            material_node.node_tree = cls.uv_grid_nodegroup(
+                scene_data=scene_data
+            )
+            # links
+            uv_grid_material.node_tree.links.new(material_node.outputs['BSDF'], output_node.inputs[0])
+        return uv_grid_material
+
+    @classmethod
     def uv_grid_nodegroup(cls, scene_data):
         # create uv grid node group
         nodegroup = next((nodegroup for nodegroup in scene_data.node_groups if cls._uv_grid_id in nodegroup), None)
@@ -266,6 +349,25 @@ class EeveeMaterialsOverride:
             uv_grid_image = list(set(scene_images) - existing_images)[0]
             uv_grid_image[cls._uv_grid_id] = True  # id marker
         return uv_grid_image
+
+    @classmethod
+    def clean_materials(cls, scene_data):
+        # remove all override node groups from all materials
+        materials = (material for material in scene_data.materials if material.node_tree and cls._override_base not in material)
+        for material in materials:
+            override_node = next((node for node in material.node_tree.nodes if cls._overrider_id in node), None)
+            if override_node:
+                link_to_override_node = next((link for link in material.node_tree.links if link.to_node == override_node), None)
+                if link_to_override_node:
+                    output_node = next((node for node in material.node_tree.nodes if node.type == 'OUTPUT_MATERIAL'), None)
+                    material.node_tree.links.new(link_to_override_node.from_socket, output_node.inputs[0])
+                material.node_tree.nodes.remove(override_node)
+
+    @classmethod
+    def remove_all_objects_backup(cls, scene_data):
+        # remove all materials backup from all objects (without restoring)
+        for obj in scene_data.objects:
+            obj.eevee_materials_override_mat_backup.clear()
 
     @classmethod
     def _default_material_init(cls, scene_data):
