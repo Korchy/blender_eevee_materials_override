@@ -6,6 +6,7 @@
 
 import bpy
 
+
 class EeveeMaterialsOverride:
 
     _overrider_id = 'eevee_materials_overrider'
