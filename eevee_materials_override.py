@@ -33,7 +33,10 @@ class EeveeMaterialsOverride:
             override_nodetree = cls.override_nodegroup(node_groups=scene_data.node_groups)
             custom_nodetree = cls.node_tree_from_material(material=custom_material)
             if custom_nodetree:
-                cls.set_override_material(override_nodetree=override_nodetree, material_nodetree=custom_nodetree)
+                cls.set_override_material(
+                    override_nodetree=override_nodetree,
+                    material_nodetree=custom_nodetree
+                )
                 cls.extend_to_all_materials(scene_data=scene_data)
 
     @classmethod
@@ -54,25 +57,43 @@ class EeveeMaterialsOverride:
             if bpy.context.preferences.addons[__package__].preferences.override_no_material:
                 cls._default_material_init(scene_data=scene_data)
             # extend to all materials
-            materials = (material for material in scene_data.materials if material.node_tree and cls._override_base not in material)
+            materials = (material for material in scene_data.materials
+                         if material.node_tree and cls._override_base not in material)
             for material in materials:
                 override_node = next((node for node in material.node_tree.nodes if cls._overrider_id in node), None)
-                node_material_output = next((node for node in material.node_tree.nodes if node.name == 'Material Output'), None)
+                # node_material_output = next((node for node in material.node_tree.nodes
+                #                              if node.name == 'Material Output'), None)
+                node_material_output = next(
+                    (node for node in material.node_tree.nodes
+                     if node.type == 'OUTPUT_MATERIAL' and node.is_active_output is True),
+                    None)
                 if node_material_output:
                     if not override_node:
                         override_node = material.node_tree.nodes.new(type='ShaderNodeGroup')
                         override_node.node_tree = override_nodegroup
                         override_node[cls._overrider_id] = True  # id marker
                         override_node.name = cls._overrider_name
-                        override_node.location = (node_material_output.location.x, node_material_output.location.y + override_node.height + 25)
-                    linked = next((link for link in material.node_tree.links if link.to_node == node_material_output and link.from_node == override_node), None)
+                        override_node.location = (node_material_output.location.x,
+                                                  node_material_output.location.y + override_node.height + 25)
+                    linked = next((link for link in material.node_tree.links
+                                   if link.to_node == node_material_output and link.from_node == override_node), None)
                     if not linked:
-                        link_to_output_node = next((link for link in material.node_tree.links if link.to_node == node_material_output), None)
+                        link_to_output_node = next(
+                            (link for link in material.node_tree.links
+                             if link.to_node == node_material_output
+                             and link.to_socket == node_material_output.inputs['Surface']),
+                            None)
                         if link_to_output_node:
                             link_to_output_node_from_socket = link_to_output_node.from_socket
                             material.node_tree.links.remove(link_to_output_node)
-                            material.node_tree.links.new(link_to_output_node_from_socket, override_node.inputs['Surface'])
-                        material.node_tree.links.new(override_node.outputs['BSDF'], node_material_output.inputs['Surface'])
+                            material.node_tree.links.new(
+                                link_to_output_node_from_socket,
+                                override_node.inputs['Surface']
+                            )
+                        material.node_tree.links.new(
+                            override_node.outputs['BSDF'],
+                            node_material_output.inputs['Surface']
+                        )
                 # if this material excluded from override - mute override node group
                 if material.eevee_materials_override_exclude and override_node:
                     override_node.mute = True
@@ -177,7 +198,9 @@ class EeveeMaterialsOverride:
             clay_material.use_nodes = True
             clay_material[cls._override_base] = True    # override base material
             clay_material[cls._clay_id] = True          # id marker
-            output_node = next((node for node in clay_material.node_tree.nodes if node.type == 'OUTPUT_MATERIAL'), None)
+            output_node = next(
+                (node for node in clay_material.node_tree.nodes if node.type == 'OUTPUT_MATERIAL'),
+                None)
             for node in clay_material.node_tree.nodes:
                 if node != output_node:
                     clay_material.node_tree.nodes.remove(node)
@@ -252,19 +275,33 @@ class EeveeMaterialsOverride:
             # if recreation - remove overrider node group
             overrider_nodegroup = next((node for node in node_tree.nodes if cls._overrider_id in node), None)
             if overrider_nodegroup:
-                link_to_surface = next((link for link in node_tree.links
-                                        if link.to_node == overrider_nodegroup and link.to_socket == overrider_nodegroup.inputs['Surface']), None)
+                link_to_surface = next(
+                    (link for link in node_tree.links
+                     if link.to_node == overrider_nodegroup
+                     and link.to_socket == overrider_nodegroup.inputs['Surface']),
+                    None)
                 if link_to_surface:
-                    node_tree.links.new(link_to_surface.from_socket, group_output_node.inputs['Surface'])
+                    node_tree.links.new(
+                        link_to_surface.from_socket,
+                        group_output_node.inputs['Surface']
+                    )
                 # remove overrider node group node
                 node_tree.nodes.remove(overrider_nodegroup)
             # if first time
-            material_output_node = next((node for node in node_tree.nodes if node.type == 'OUTPUT_MATERIAL'), None)
+            material_output_node = next(
+                (node for node in node_tree.nodes if node.type == 'OUTPUT_MATERIAL'),
+                None)
             if material_output_node:
-                link_to_surface = next((link for link in node_tree.links
-                                        if link.to_node == material_output_node and link.to_socket == material_output_node.inputs['Surface']), None)
+                link_to_surface = next(
+                    (link for link in node_tree.links
+                     if link.to_node == material_output_node
+                     and link.to_socket == material_output_node.inputs['Surface']),
+                    None)
                 if link_to_surface:
-                    node_tree.links.new(link_to_surface.from_socket, group_output_node.inputs['Surface'])
+                    node_tree.links.new(
+                        link_to_surface.from_socket,
+                        group_output_node.inputs['Surface']
+                    )
                 link_to_volume = next((link for link in node_tree.links
                                        if link.to_node == material_output_node and link.to_socket == material_output_node.inputs['Volume']), None)
                 if link_to_volume:
@@ -290,7 +327,10 @@ class EeveeMaterialsOverride:
             uv_grid_material.use_nodes = True
             uv_grid_material[cls._override_base] = True    # override base material
             uv_grid_material[cls._uv_grid_id] = True       # id marker
-            output_node = next((node for node in uv_grid_material.node_tree.nodes if node.type == 'OUTPUT_MATERIAL'), None)
+            output_node = next(
+                (node for node in uv_grid_material.node_tree.nodes
+                 if node.type == 'OUTPUT_MATERIAL'),
+                None)
             for node in uv_grid_material.node_tree.nodes:
                 if node != output_node:
                     uv_grid_material.node_tree.nodes.remove(node)
@@ -352,13 +392,18 @@ class EeveeMaterialsOverride:
     @classmethod
     def clean_materials(cls, scene_data):
         # remove all override node groups from all materials
-        materials = (material for material in scene_data.materials if material.node_tree and cls._override_base not in material)
+        materials = (material for material in scene_data.materials
+                     if material.node_tree and cls._override_base not in material)
         for material in materials:
             override_node = next((node for node in material.node_tree.nodes if cls._overrider_id in node), None)
             if override_node:
-                link_to_override_node = next((link for link in material.node_tree.links if link.to_node == override_node), None)
+                link_to_override_node = next((link for link in material.node_tree.links
+                                              if link.to_node == override_node), None)
                 if link_to_override_node:
-                    output_node = next((node for node in material.node_tree.nodes if node.type == 'OUTPUT_MATERIAL'), None)
+                    output_node = next(
+                        (node for node in material.node_tree.nodes
+                         if node.type == 'OUTPUT_MATERIAL' and node.is_active_output is True),
+                        None)
                     material.node_tree.links.new(link_to_override_node.from_socket, output_node.inputs[0])
                 material.node_tree.nodes.remove(override_node)
 

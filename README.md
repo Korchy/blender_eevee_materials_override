@@ -29,11 +29,11 @@ The add-on is for the “EEVEE” render engine but also works with the “Cycle
 
 Current add-on version
 -
-1.3.0.
+1.3.1.
 
 Blender versions
 -
-2.83, 2.90, 2.91
+2.83, 2.90, 2.91, 2.92, 2.93, 3.0, 3.1
 
 Location and call
 -
@@ -46,6 +46,9 @@ Installation
 
 Version history
 -
+1.3.1.
+- fixed issue with overriding materials with links connected to volume input of Output Material node
+
 1.3.0.
 - added "override for selected objects" feature
 - added clearing features for the object and the materials mode
