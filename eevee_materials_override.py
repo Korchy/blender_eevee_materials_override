@@ -302,12 +302,18 @@ class EeveeMaterialsOverride:
                         link_to_surface.from_socket,
                         group_output_node.inputs['Surface']
                     )
-                link_to_volume = next((link for link in node_tree.links
-                                       if link.to_node == material_output_node and link.to_socket == material_output_node.inputs['Volume']), None)
+                link_to_volume = next(
+                    (link for link in node_tree.links
+                     if link.to_node == material_output_node
+                     and link.to_socket == material_output_node.inputs['Volume']),
+                    None)
                 if link_to_volume:
                     node_tree.links.new(link_to_volume.from_socket, group_output_node.inputs['Volume'])
-                link_to_displace = next((link for link in node_tree.links
-                                         if link.to_node == material_output_node and link.to_socket == material_output_node.inputs['Displacement']), None)
+                link_to_displace = next(
+                    (link for link in node_tree.links
+                     if link.to_node == material_output_node
+                     and link.to_socket == material_output_node.inputs['Displacement']),
+                    None)
                 if link_to_displace:
                     node_tree.links.new(link_to_displace.from_socket, group_output_node.inputs['Displacement'])
                 # remove material output node
@@ -416,10 +422,14 @@ class EeveeMaterialsOverride:
     @classmethod
     def _default_material_init(cls, scene_data):
         # init objects without material with the default material
-        no_material_objects = (obj for obj in scene_data.objects if not obj.active_material and obj.type in ('MESH', 'CURVE'))
+        no_material_objects = (obj for obj in scene_data.objects
+                               if not obj.active_material and obj.type in ('MESH', 'CURVE'))
         if no_material_objects:
             # create default materials
-            default_override_material = next((material for material in scene_data.materials if material.name == cls._default_override_material_name), None)
+            default_override_material = next(
+                (material for material in scene_data.materials
+                 if material.name == cls._default_override_material_name),
+                None)
             if not default_override_material:
                 default_override_material = scene_data.materials.new(name=cls._default_override_material_name)
                 default_override_material.use_nodes = True
