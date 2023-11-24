@@ -120,7 +120,7 @@ class EeveeMaterialsOverride:
             # next - override
             for obj in objects:
                 for slot in obj.material_slots:
-                    # slot.link = 'OBJECT'    # 'DATA'  - don't override on linked objects - need to be backup and restore as materials
+                    # slot.link = 'OBJECT'    # 'DATA' - don't override on linked objects - need to be backup and restore as materials
                     slot.material = material
 
     @classmethod
@@ -172,9 +172,23 @@ class EeveeMaterialsOverride:
             nodegroup = node_groups.new(cls._overrider_name, 'ShaderNodeTree')
             nodegroup[cls._overrider_id] = True  # id marker
             # inputs
-            nodegroup.inputs.new('NodeSocketShader', 'Surface')
+            if bpy.app.version < (4, 0, 0):
+                nodegroup.inputs.new('NodeSocketShader', 'Surface')
+            else:
+                nodegroup.interface.new_socket(
+                    name='Surface',
+                    in_out='INPUT',
+                    socket_type='NodeSocketShader'
+                )
             # outputs
-            nodegroup.outputs.new('NodeSocketShader', 'BSDF')
+            if bpy.app.version < (4, 0, 0):
+                nodegroup.outputs.new('NodeSocketShader', 'BSDF')
+            else:
+                nodegroup.interface.new_socket(
+                    name='BSDF',
+                    in_out='OUTPUT',
+                    socket_type='NodeSocketShader'
+                )
             # nodes
             group_input_node = nodegroup.nodes.new('NodeGroupInput')
             group_input_node.location = (-200, 0)
@@ -222,7 +236,14 @@ class EeveeMaterialsOverride:
             nodegroup = node_groups.new(cls._clay_name, 'ShaderNodeTree')
             nodegroup[cls._clay_id] = True  # id marker
             # outputs
-            nodegroup.outputs.new('NodeSocketShader', 'BSDF')
+            if bpy.app.version < (4, 0, 0):
+                nodegroup.outputs.new('NodeSocketShader', 'BSDF')
+            else:
+                nodegroup.interface.new_socket(
+                    name='BSDF',
+                    in_out='OUTPUT',
+                    socket_type='NodeSocketShader'
+                )
             # group input/output nodes
             group_input_node = nodegroup.nodes.new('NodeGroupInput')
             group_input_node.location = (-800, 200)
@@ -264,9 +285,26 @@ class EeveeMaterialsOverride:
             node_tree = material.node_tree.copy()
             # modify node tree to be compatible with node group
             # outputs
-            node_tree.outputs.new('NodeSocketShader', 'Surface')
-            node_tree.outputs.new('NodeSocketShader', 'Volume')
-            node_tree.outputs.new('NodeSocketVector', 'Displacement')
+            if bpy.app.version < (4, 0, 0):
+                node_tree.outputs.new('NodeSocketShader', 'Surface')
+                node_tree.outputs.new('NodeSocketShader', 'Volume')
+                node_tree.outputs.new('NodeSocketVector', 'Displacement')
+            else:
+                node_tree.interface.new_socket(
+                    name='Surface',
+                    in_out='OUTPUT',
+                    socket_type='NodeSocketShader'
+                )
+                node_tree.interface.new_socket(
+                    name='Volume',
+                    in_out='OUTPUT',
+                    socket_type='NodeSocketShader'
+                )
+                node_tree.interface.new_socket(
+                    name='Displacement',
+                    in_out='OUTPUT',
+                    socket_type='NodeSocketShader'
+                )
             # input/output nodes
             group_input_node = node_tree.nodes.new('NodeGroupInput')
             group_input_node.location = (-800, 200)
@@ -358,7 +396,14 @@ class EeveeMaterialsOverride:
             nodegroup = scene_data.node_groups.new(cls._uv_grid_name, 'ShaderNodeTree')
             nodegroup[cls._uv_grid_id] = True  # id marker
             # outputs
-            nodegroup.outputs.new('NodeSocketShader', 'BSDF')
+            if bpy.app.version < (4, 0, 0):
+                nodegroup.outputs.new('NodeSocketShader', 'BSDF')
+            else:
+                nodegroup.interface.new_socket(
+                    name='BSDF',
+                    in_out='OUTPUT',
+                    socket_type='NodeSocketShader'
+                )
             # group input/output nodes
             group_input_node = nodegroup.nodes.new('NodeGroupInput')
             group_input_node.location = (-800, 200)
