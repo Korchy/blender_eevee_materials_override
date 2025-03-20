@@ -41,6 +41,10 @@ Location and call
 
 Installation
 -
+Note, the dev-version is on GitHub. For release versions, please see the add-on's web-page: https://b3d.interplanety.org/en/blender-add-on-eevee-materials-override/
+
+**Installing to Blender**
+
 - Download the *.zip archive with the add-on distributive.
 - The “Preferences” window — Add-ons — Install… — specify the downloaded archive.
 
