@@ -1,0 +1,19 @@
+schema_version = "1.0.0"
+
+id = "eevee_materials_override"
+version = "1.3.3"
+name = "EEVEE Materials Override"
+tagline = "Global scene materials override for the EEVEE render engine"
+maintainer = "Nikita Akimov <interplanety@interplanety.org>"
+type = "add-on"
+website = " https://b3d.interplanety.org/en/blender-add-on-eevee-materials-override/"
+tags = ["Material", "Render"]
+
+blender_version_min = "2.83.0"
+# blender_version_max = "5.1.0"
+
+# License conforming to https://spdx.org/licenses/ (use "SPDX: prefix)
+# https://docs.blender.org/manual/en/dev/advanced/extensions/licenses.html
+license = [
+  "SPDX:GPL-3.0-or-later",
+]
