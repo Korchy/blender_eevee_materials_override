@@ -15,7 +15,7 @@ bl_info = {
     'name': 'eevee_materials_override',
     'category': 'Material',
     'author': 'Nikita Akimov',
-    'version': (1, 3, 2),
+    'version': (1, 3, 3),
     'blender': (2, 83, 0),
     'location': 'N-Panel > Override',
     'wiki_url': 'https://b3d.interplanety.org/en/blender-add-on-eevee-materials-override/',
@@ -31,7 +31,9 @@ def register():
         eevee_materials_override_ops.register()
         eevee_materials_override_panel.register()
     else:
-        print('It seems you are trying to use the dev version of the ' + bl_info['name'] + ' add-on. It may work not properly. Please download and use the release version!')
+        print('It seems you are trying to use the dev version of the ' \
+              + bl_info['name'] \
+              + ' add-on. It may work not properly. Please download and use the release version!')
 
 
 def unregister():

@@ -145,7 +145,7 @@ class EeveeMaterialsOverride:
         if material.node_tree:
             override_node = next((node for node in material.node_tree.nodes if cls._overrider_id in node), None)
             if override_node:
-                override_node.mute = float(material.eevee_materials_override_exclude)
+                override_node.mute = bool(material.eevee_materials_override_exclude)
 
     @staticmethod
     def set_override_material(override_nodetree, material_nodetree):
@@ -262,19 +262,28 @@ class EeveeMaterialsOverride:
             glossy_bsdf.location = (-180.6, 123.2)
             glossy_bsdf.inputs[0].default_value = (1.0, 1.0, 1.0, 1.0)
             glossy_bsdf.inputs[1].default_value = 0.45
-            mix = nodegroup.nodes.new('ShaderNodeMixRGB')
+            if bpy.app.version < (5, 1, 0):
+                mix = nodegroup.nodes.new('ShaderNodeMixRGB')
+                mix.inputs[1].default_value = (0.8, 0.258, 0.092, 1.0)
+                mix.inputs[2].default_value = (0.533, 0.175, 0.064, 1.0)
+            else:
+                mix = nodegroup.nodes.new('ShaderNodeMix')
+                mix.data_type = 'RGBA'
+                mix.inputs['A'].default_value = (0.8, 0.258, 0.092, 1.0)
+                mix.inputs['B'].default_value = (0.533, 0.175, 0.064, 1.0)
             mix.location = (-371.1, 258.9)
-            mix.inputs[1].default_value = (0.8, 0.258, 0.092, 1.0)
-            mix.inputs[2].default_value = (0.533, 0.175, 0.064, 1.0)
             mix_shader = nodegroup.nodes.new('ShaderNodeMixShader')
             mix_shader.location = (99.1, 275.6)
             # links
             nodegroup.links.new(diffuse_bsdf.outputs[0], mix_shader.inputs[1])
             nodegroup.links.new(glossy_bsdf.outputs[0], mix_shader.inputs[2])
             nodegroup.links.new(layer_weight.outputs[1], mix.inputs[0])
-            nodegroup.links.new(mix.outputs[0], diffuse_bsdf.inputs[0])
             nodegroup.links.new(fresnel.outputs[0], mix_shader.inputs[0])
             nodegroup.links.new(mix_shader.outputs[0], group_output_node.inputs[0])
+            if bpy.app.version < (5, 1, 0):
+                nodegroup.links.new(mix.outputs[0], diffuse_bsdf.inputs[0])
+            else:
+                nodegroup.links.new(mix.outputs['Result'], diffuse_bsdf.inputs[0])
         return nodegroup
 
     @classmethod
@@ -303,7 +312,7 @@ class EeveeMaterialsOverride:
                 node_tree.interface.new_socket(
                     name='Displacement',
                     in_out='OUTPUT',
-                    socket_type='NodeSocketShader'
+                    socket_type='NodeSocketVector'
                 )
             # input/output nodes
             group_input_node = node_tree.nodes.new('NodeGroupInput')

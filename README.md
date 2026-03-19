@@ -29,11 +29,11 @@ The add-on is for the “EEVEE” render engine but also works with the “Cycle
 
 Current add-on version
 -
-1.3.2.
+1.3.3.
 
 Blender versions
 -
-2.83, 2.90, 2.91, 2.92, 2.93, 3.0, 3.1, 3.2, 3.3, 3.4, 3.5, 3.6, 4.0
+2.83, 2.90, 2.91, 2.92, 2.93, 3.0, 3.1, 3.2, 3.3, 3.4, 3.5, 3.6, 4.0, 4.1, 4.2, 4.3, 4.4, 4.5, 5.0, 5.1
 
 Location and call
 -
@@ -50,6 +50,9 @@ Note, the dev-version is on GitHub. For release versions, please see the add-on'
 
 Version history
 -
+1.3.3.
+- fixed issues; check compatibility with Blender 5.0, 5.1
+
 1.3.2.
 - fixed issues to make compatible with Blender 4.0
 
