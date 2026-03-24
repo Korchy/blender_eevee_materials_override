@@ -6,7 +6,7 @@ name = "EEVEE Materials Override"
 tagline = "Global scene materials override for the EEVEE render engine"
 maintainer = "Nikita Akimov <interplanety@interplanety.org>"
 type = "add-on"
-website = " https://b3d.interplanety.org/en/blender-add-on-eevee-materials-override/"
+website = "https://b3d.interplanety.org/en/blender-add-on-eevee-materials-override/"
 tags = ["Material", "Render"]
 
 blender_version_min = "2.83.0"
